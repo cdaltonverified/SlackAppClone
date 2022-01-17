@@ -1,5 +1,9 @@
 import React, {useState} from 'react';
-import { Form, Grid, Segment, Header, Icon, Button, Message } from 'semantic-ui-react';
+import { Form, Grid, Segment, Header, Icon, Button, Message } from 'semantic-ui-react'
+import firebase from '../../../server/firebase'
+import { Link } from 'react-router-dom'
+
+import "./Register.css"
 
 const Register = () => {
 
@@ -10,9 +14,12 @@ const Register = () => {
     }
 
     let errors = [];
+    let userCollectionRef = firebase.database().ref('users');
 
     const [userState, setUserState] = useState(user);
     const [errorState, setErrorState] = useState(errors);
+    const [pageLoading, setPageLoading] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
 
     const updateFormState = (event) =>{
         let target = event.target;
@@ -37,8 +44,19 @@ const Register = () => {
 
     const onSubmit = (event) => {
         setErrorState(() => []);
+        setIsRegistered(false);
         if(validateForm()){
-
+            setPageLoading(true);
+            firebase.auth()
+            .createUserWithEmailAndPassword(userState.email, userState.password)
+            .then(createdUser => {
+                setPageLoading(false);
+                updateUserProfile(createdUser);
+            })
+            .catch(firebaseError => {
+                setPageLoading(false);
+                setErrorState((error) => error.concat(firebaseError));
+            })
         }
     }
 
@@ -46,7 +64,41 @@ const Register = () => {
         return errorState.map((error, index) => <p key={index}>{error.message}</p>)
     }
 
-    return (<Grid verticalAlign="middle" textAlign="center">
+    const updateUserProfile = ( createdUser) => {
+        if(createdUser){
+            setPageLoading(true);
+            createdUser.user.updateProfile({
+                displayName: userState.username,
+                photoURL: `https://gravatar.com/avatar/${createdUser.user.uid}?d=identicon`
+            })
+            .then(() => {
+                setPageLoading(false);
+                saveUserDetailsInDatabase(createdUser);
+            })
+            .catch((firebaseError) => {
+                setPageLoading(false);
+                setErrorState((error) => error.concat(firebaseError));
+            })
+        }
+    }
+
+    const saveUserDetailsInDatabase = (createdUser) => {
+        setPageLoading(true);
+        userCollectionRef.child(createdUser.user.uid).set({
+            displayName: createdUser.user.displayName,
+            photoURL: createdUser.user.photoURL
+        })
+        .then(() => {
+            setPageLoading(false);
+            setIsRegistered(true);
+        })
+        .catch(firebaseError => {
+            setPageLoading(false);
+            setErrorState((error) => error.concat(firebaseError));
+        })
+    }
+
+    return (<Grid verticalAlign="middle" textAlign="center" className="grid-form">
     <Grid.Column style={{maxWidth: '550px'}}>
         <Header icon as = "h1">
             <Icon name="slack" />
@@ -84,13 +136,20 @@ const Register = () => {
                 placeholder="Password"
                 />
             </Segment>
-            <Button>Register</Button>
+            <Button disabled={pageLoading} loading={pageLoading}>Register</Button>
         </Form>
         {errorState.length > 0 && <Message error>
             <h2>An error occurred.</h2>
             {formatErrors()}
         </Message>
         }
+        {isRegistered && <Message success>
+            <h2>Sign up successful.</h2>
+        </Message>
+        }
+        <Message>
+            Go to <Link to="/login">Login</Link> instead.
+        </Message>
     </Grid.Column>
     </Grid>)
 }
