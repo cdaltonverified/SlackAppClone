@@ -22,7 +22,7 @@ const UserCard = (props) => {
     const getDropDown = () => {
         return [{
             key: 'signout',
-            text: <span onClick={ logout } > Logout</span>
+            text: <span onClick={logout} > Logout</span>
         }]
     }
 
