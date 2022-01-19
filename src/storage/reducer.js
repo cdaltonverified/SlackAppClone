@@ -8,7 +8,7 @@ let defaultUserState = {
 const userReducer = (state = defaultUserState, action) => {
     if (action.type === SET_USER) {
         let payload = action.payload;
-        state = { ...payload };
+        state = {...payload };
         return state;
     }
     return state;
@@ -16,14 +16,14 @@ const userReducer = (state = defaultUserState, action) => {
 
 let defaultChannelState = {
     currentChannel: null,
-    loading : true
+    loading: true
 }
 
 const channelReducer = (state = defaultChannelState, action) => {
     if (action.type === SET_CHANNEL) {
         let payload = action.payload;
-        state = { ...payload };
-        state.loading= false;
+        state = {...payload };
+        state.loading = false;
         return state;
     }
     return state;
@@ -37,16 +37,16 @@ let defaultFavouriteChannelState = {
 const favouriteChannelReducer = (state = defaultFavouriteChannelState, action) => {
     if (action.type === SET_FAVOURITE_CHANNEL) {
         let payload = action.payload.favouriteChannel;
-        let updatedState = { ...state.favouriteChannel };
+        let updatedState = {...state.favouriteChannel };
         updatedState[payload.channelId] = payload.channelName;
         return { favouriteChannel: updatedState };
     } else if (action.type === REMOVE_FAVOURITE_CHANNEL) {
         let payload = action.payload.favouriteChannel;
-        let updatedState = { ...state.favouriteChannel };
+        let updatedState = {...state.favouriteChannel };
         delete updatedState[payload.channelId];
         return { favouriteChannel: updatedState };
     }
     return state;
 }
 
-export const combinedReducers = combineReducers({ user: userReducer, channel: channelReducer ,favouriteChannel : favouriteChannelReducer  })
+export const combinedReducers = combineReducers({ user: userReducer, channel: channelReducer, favouriteChannel: favouriteChannelReducer })

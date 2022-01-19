@@ -1,4 +1,4 @@
-import { SET_USER, SET_CHANNEL, SET_FAVOURITE_CHANNEL, REMOVE_FAVOURITE_CHANNEL} from './actiontypes';
+import { SET_USER, SET_CHANNEL, SET_FAVOURITE_CHANNEL, REMOVE_FAVOURITE_CHANNEL } from './actiontypes';
 
 export const setUser = (user) => {
     return {
